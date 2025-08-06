@@ -1,0 +1,21 @@
+name: Daily Commit
+
+on:
+  schedule:
+    - cron: '0 10 * * *' # Every day at 10 AM UTC
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Make fake commit
+        run: |
+          echo "$(date) random commit" >> activity.log
+          git config user.name "daivik05"
+          git config user.email "daiviknandan05@gmail.com"
+          git add activity.log
+          git commit -m "GitHub Actions fake commit on $(date)" || echo "No changes to commit"
+          git push
