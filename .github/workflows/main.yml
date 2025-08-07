@@ -2,20 +2,34 @@ name: Daily Commit
 
 on:
   schedule:
-    - cron: '0 10 * * *' # Every day at 10 AM UTC
+    - cron: '0 10 * * *'  # every day at 10:00 UTC
+  workflow_dispatch:       # allows you to trigger it manually too
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
 
-      - name: Make fake commit
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false  # important for custom push auth
+
+      - name: Set up Git
         run: |
-          echo "$(date) random commit" >> activity.log
           git config user.name "daivik05"
           git config user.email "daiviknandan05@gmail.com"
+
+      - name: Make a fake commit
+        run: |
+          echo "$(date) fake commit" >> activity.log
           git add activity.log
           git commit -m "GitHub Actions fake commit on $(date)" || echo "No changes to commit"
-          git push
+
+      - name: Push changes
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
+          git push origin main
+
